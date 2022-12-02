@@ -1,4 +1,3 @@
-use std::cmp::max;
 use std::io;
 use std::io::BufRead;
 
@@ -13,13 +12,67 @@ struct Args {
     part: u8,
 }
 
-fn part1() {
-   
+#[derive(Debug, Clone, Copy)]
+enum RPSMove {
+    Paper,
+    Rock,
+    Scissors,
+}
+use crate::RPSMove::*;
+
+fn calculate_score(them: RPSMove, you: RPSMove) -> u32 {
+    let outcome_score = match (them, you) {
+        (Paper, Paper) => 3,
+        (Paper, Rock) => 0,
+        (Paper, Scissors) => 6,
+        (Rock, Paper) => 6,
+        (Rock, Rock) => 3,
+        (Rock, Scissors) => 0,
+        (Scissors, Paper) => 0,
+        (Scissors, Rock) => 6,
+        (Scissors, Scissors) => 3,
+    };
+    let select_score = match you {
+        Paper => 2,
+        Rock => 1,
+        Scissors => 3,
+    };
+    outcome_score + select_score
 }
 
-fn part2() {
-    
+fn part1() {
+    let mut result: u32 = 0;
+
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        let bytes = line.unwrap().as_bytes().to_owned();
+        let (them_b, you_b) = (bytes[0], bytes[2]);
+        let them = match them_b as char {
+            'A' => Rock,
+            'B' => Paper,
+            'C' => Scissors,
+            _ => panic!("input {:?} not recognized", bytes),
+        };
+        let you = match you_b as char {
+            'X' => Rock,
+            'Y' => Paper,
+            'Z' => Scissors,
+            _ => panic!("input {:?} not recognized", bytes),
+        };
+        println!(
+            "calculate_score({:?},{:?}) = {}",
+            them,
+            you,
+            calculate_score(them, you)
+        );
+
+        result += calculate_score(them, you);
+    }
+
+    println!("result = {}", result);
 }
+
+fn part2() {}
 
 fn main() {
     let part = Args::parse().part;
