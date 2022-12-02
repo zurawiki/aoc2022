@@ -47,16 +47,16 @@ fn part1() {
     for line in stdin.lock().lines() {
         let bytes = line.unwrap().as_bytes().to_owned();
         let (them_b, you_b) = (bytes[0], bytes[2]);
-        let them = match them_b as char {
-            'A' => Rock,
-            'B' => Paper,
-            'C' => Scissors,
+        let them = match them_b {
+            b'A' => Rock,
+            b'B' => Paper,
+            b'C' => Scissors,
             _ => panic!("input {:?} not recognized", bytes),
         };
-        let you = match you_b as char {
-            'X' => Rock,
-            'Y' => Paper,
-            'Z' => Scissors,
+        let you = match you_b {
+            b'X' => Rock,
+            b'Y' => Paper,
+            b'Z' => Scissors,
             _ => panic!("input {:?} not recognized", bytes),
         };
         println!(
@@ -72,7 +72,42 @@ fn part1() {
     println!("result = {}", result);
 }
 
-fn part2() {}
+fn part2() {
+    let mut result: u32 = 0;
+
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        let bytes = line.unwrap().as_bytes().to_owned();
+        let (them_b, you_b) = (bytes[0], bytes[2]);
+        let them = match them_b {
+            b'A' => Rock,
+            b'B' => Paper,
+            b'C' => Scissors,
+            _ => panic!("input {:?} not recognized", bytes),
+        };
+        let you = match (them, you_b) {
+            (_, b'Y') => them,
+            (Rock, b'X') => Scissors,
+            (Paper, b'X') => Rock,
+            (Scissors, b'X') => Paper,
+            (Rock, b'Z') => Paper,
+            (Paper, b'Z') => Scissors,
+            (Scissors, b'Z') => Rock,
+
+            _ => panic!("input {:?} not recognized", bytes),
+        };
+        println!(
+            "calculate_score({:?},{:?}) = {}",
+            them,
+            you,
+            calculate_score(them, you)
+        );
+
+        result += calculate_score(them, you);
+    }
+
+    println!("result = {}", result);
+}
 
 fn main() {
     let part = Args::parse().part;
