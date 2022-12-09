@@ -29,6 +29,19 @@ pub fn get_common_letter(a: &[u8], b: &[u8]) -> u8 {
     intersection.next().unwrap().clone()
 }
 
+pub fn get_common_letter3(a: &[u8], b: &[u8], c: &[u8]) -> u8 {
+    let a_set = a.iter().map(|&x| x).collect::<HashSet<u8>>();
+    let b_set = b.iter().map(|&x| x).collect::<HashSet<u8>>();
+    let c_set = c.iter().map(|&x| x).collect::<HashSet<u8>>();
+    let a_and_b_set = a_set
+        .intersection(&b_set)
+        .map(|&x| x)
+        .collect::<HashSet<u8>>();
+    let mut result = a_and_b_set.intersection(&c_set);
+
+    result.next().unwrap().clone()
+}
+
 fn part1() {
     let mut result: u32 = 0;
 
@@ -44,7 +57,28 @@ fn part1() {
     println!("result = {}", result);
 }
 
-fn part2() {}
+fn part2() {
+    let mut result: u32 = 0;
+
+    let lines = io::stdin()
+        .lock()
+        .lines()
+        .map(|x| x.unwrap())
+        .collect::<Vec<_>>();
+    let chunks = lines.chunks(3);
+
+    for chunk in chunks {
+        let common_letter = get_common_letter3(
+            chunk[0].as_bytes(),
+            chunk[1].as_bytes(),
+            chunk[2].as_bytes(),
+        );
+
+        result += score_letter(common_letter);
+    }
+
+    println!("result = {}", result);
+}
 
 fn main() {
     let part = Args::parse().part;
