@@ -33,10 +33,10 @@ fn part1() -> color_eyre::Result<()> {
                 second.0.parse::<u32>().unwrap(),
                 second.1.parse::<u32>().unwrap(),
             );
-            let is_overlapping = (x1 <= x2 && y1 >= y2) || (x2 <= x1 && y2 >= y1);
-            dbg!((line, is_overlapping));
+            let is_contained = (x1 <= x2 && y1 >= y2) || (x2 <= x1 && y2 >= y1);
+            dbg!((line, is_contained));
 
-            if is_overlapping {
+            if is_contained {
                 Some(())
             } else {
                 None
@@ -48,6 +48,35 @@ fn part1() -> color_eyre::Result<()> {
 }
 
 fn part2() -> color_eyre::Result<()> {
+    let full_overlaps = include_str!("../../data/day04/input.txt")
+        .lines()
+        .filter_map(|line| {
+            let ranges = line.split_once(',')?;
+            let first = ranges.0.split_once('-')?;
+            let (x1, y1) = (
+                first.0.parse::<u32>().unwrap(),
+                first.1.parse::<u32>().unwrap(),
+            );
+
+            let second = ranges.1.split_once('-')?;
+            let (x2, y2) = (
+                second.0.parse::<u32>().unwrap(),
+                second.1.parse::<u32>().unwrap(),
+            );
+            let is_overlapping = (x1 <= x2 && y1 >= x2)
+                || (x1 <= y2 && y1 >= y2)
+                || (x2 <= x1 && y2 >= x1)
+                || (x2 <= y1 && y2 >= y1);
+            dbg!((line, is_overlapping));
+
+            if is_overlapping {
+                Some(())
+            } else {
+                None
+            }
+        })
+        .count();
+    dbg!(full_overlaps);
     Ok(())
 }
 
