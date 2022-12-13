@@ -9,6 +9,16 @@ struct Args {
     part: u8,
 }
 
+pub fn score_letter(ch: u8) -> u32 {
+    match ch {
+        b'a'..=b'z' => (ch - b'a' + 1).into(),
+        b'A'..=b'Z' => (ch - b'A' + 27).into(),
+        _ => panic!("bad letter"),
+    }
+}
+
+
+
 fn part1() -> color_eyre::Result<()> {
     let full_overlaps = include_str!("../../data/day04/input.txt")
         .lines()
@@ -83,4 +93,15 @@ fn main() -> color_eyre::Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn test_part() {
+        assert_eq!(1, 1);
+    }
 }
