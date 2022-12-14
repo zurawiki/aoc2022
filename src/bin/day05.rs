@@ -9,76 +9,103 @@ struct Args {
     part: u8,
 }
 
-pub fn score_letter(ch: u8) -> u32 {
-    match ch {
-        b'a'..=b'z' => (ch - b'a' + 1).into(),
-        b'A'..=b'Z' => (ch - b'A' + 27).into(),
-        _ => panic!("bad letter"),
-    }
+fn get_input() -> &'static str {
+    // include_str!("../../data/day05/example.txt")
+    include_str!("../../data/day05/input.txt")
 }
 
+#[derive(Debug)]
+struct Day05Data {
+    stacks: Vec<Vec<u8>>,
+    moves: Vec<(usize, usize, usize)>,
+}
 
+fn process_input() -> color_eyre::Result<Day05Data> {
+    let (stack_state, moves_lines) = get_input().split_once("\n\n").unwrap();
 
-fn part1() -> color_eyre::Result<()> {
-    let full_overlaps = include_str!("../../data/day04/input.txt")
+    let mut stacks = stack_state
+        .lines()
+        .last()
+        .unwrap()
+        .split_whitespace()
+        .map(|_| vec![])
+        .collect::<Vec<Vec<u8>>>();
+    stack_state.lines().rev().skip(1).for_each(|line| {
+        let bytes = line.as_bytes();
+        for i in 0..stacks.len() {
+            let ch = bytes[1 + (4 * i)];
+            if ch.is_ascii_alphabetic() {
+                stacks.get_mut(i).unwrap().push(ch);
+            }
+        }
+    });
+
+    let moves = moves_lines
         .lines()
         .filter_map(|line| {
-            let ranges = line.split_once(',')?;
-            let first = ranges.0.split_once('-')?;
-            let (x1, y1) = (
-                first.0.parse::<u32>().unwrap(),
-                first.1.parse::<u32>().unwrap(),
-            );
-
-            let second = ranges.1.split_once('-')?;
-            let (x2, y2) = (
-                second.0.parse::<u32>().unwrap(),
-                second.1.parse::<u32>().unwrap(),
-            );
-            let is_contained = (x1 <= x2 && y1 >= y2) || (x2 <= x1 && y2 >= y1);
-            dbg!((line, is_contained));
-
-            if is_contained {
-                Some(())
-            } else {
-                None
-            }
+            let words = line.split_whitespace().collect::<Vec<&str>>();
+            // ex: move 5 from 8 to 3
+            Some((
+                words.get(1)?.parse().ok()?,
+                words.get(3)?.parse().ok()?,
+                words.get(5)?.parse().ok()?,
+            ))
         })
-        .count();
-    dbg!(full_overlaps);
+        .collect::<Vec<(usize, usize, usize)>>();
+    Ok(Day05Data { stacks, moves })
+}
+
+fn process_move(
+    stacks: &mut Vec<Vec<u8>>,
+    (n, from, to): (usize, usize, usize),
+) -> color_eyre::Result<()> {
+    for _ in 0..n {
+        let from_stack = &mut stacks[from - 1];
+        let to_stack = &mut stacks[to - 1];
+        let item = from_stack.pop().unwrap();
+        to_stack.push(item);
+    }
+    Ok(())
+}
+
+fn process_move_bulk(
+    stacks: &mut Vec<Vec<u8>>,
+    (n, from, to): (usize, usize, usize),
+) -> color_eyre::Result<()> {
+    let from_stack = &mut stacks[from - 1];
+    let mut items = from_stack.split_off(from_stack.len() - n);
+    let to_stack = &mut stacks[to - 1];
+    to_stack.append(&mut items);
+    Ok(())
+}
+
+fn part1() -> color_eyre::Result<()> {
+    let mut data = process_input()?;
+    for move_tuple in data.moves {
+        process_move(&mut data.stacks, move_tuple)?;
+    }
+    println!(
+        "Part 1 answer: {:?}",
+        data.stacks
+            .iter()
+            .filter_map(|stack| stack.last().map(|ch| *ch as char))
+            .collect::<String>()
+    );
     Ok(())
 }
 
 fn part2() -> color_eyre::Result<()> {
-    let full_overlaps = include_str!("../../data/day04/input.txt")
-        .lines()
-        .filter_map(|line| {
-            let ranges = line.split_once(',')?;
-            let first = ranges.0.split_once('-')?;
-            let (x1, y1) = (
-                first.0.parse::<u32>().unwrap(),
-                first.1.parse::<u32>().unwrap(),
-            );
-
-            let second = ranges.1.split_once('-')?;
-            let (x2, y2) = (
-                second.0.parse::<u32>().unwrap(),
-                second.1.parse::<u32>().unwrap(),
-            );
-            let is_overlapping = (x1 <= x2 && y1 >= x2)
-                || (x1 <= y2 && y1 >= y2)
-                || (x2 <= x1 && y2 >= x1)
-                || (x2 <= y1 && y2 >= y1);
-            dbg!((line, is_overlapping));
-
-            if is_overlapping {
-                Some(())
-            } else {
-                None
-            }
-        })
-        .count();
-    dbg!(full_overlaps);
+    let mut data = process_input()?;
+    for move_tuple in data.moves {
+        process_move_bulk(&mut data.stacks, move_tuple)?;
+    }
+    println!(
+        "Part 2 answer: {:?}",
+        data.stacks
+            .iter()
+            .filter_map(|stack| stack.last().map(|ch| *ch as char))
+            .collect::<String>()
+    );
     Ok(())
 }
 
@@ -93,15 +120,4 @@ fn main() -> color_eyre::Result<()> {
     }
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
-    use super::*;
-
-    #[test]
-    fn test_part() {
-        assert_eq!(1, 1);
-    }
 }
