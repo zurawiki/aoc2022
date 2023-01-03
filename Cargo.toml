@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
 color-eyre = "0.6.2"
+nom = "7.1.1"

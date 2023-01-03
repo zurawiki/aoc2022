@@ -10,8 +10,8 @@ struct Args {
 }
 
 fn get_input() -> &'static str {
-    // include_str!("../../data/day05/example.txt")
-    include_str!("../../data/day05/input.txt")
+    include_str!("../../data/day05/example.txt")
+    // include_str!("../../data/day05/input.txt")
 }
 
 #[derive(Debug)]
@@ -60,10 +60,8 @@ fn process_move(
     (n, from, to): (usize, usize, usize),
 ) -> color_eyre::Result<()> {
     for _ in 0..n {
-        let from_stack = &mut stacks[from - 1];
-        let to_stack = &mut stacks[to - 1];
-        let item = from_stack.pop().unwrap();
-        to_stack.push(item);
+        let item = stacks.get_mut(from - 1).unwrap().pop().unwrap();
+        stacks.get_mut(to - 1).unwrap().push(item);
     }
     Ok(())
 }
@@ -72,9 +70,9 @@ fn process_move_bulk(
     stacks: &mut Vec<Vec<u8>>,
     (n, from, to): (usize, usize, usize),
 ) -> color_eyre::Result<()> {
-    let from_stack = &mut stacks[from - 1];
+    let mut from_stack = stacks.get_mut(from - 1).unwrap();
     let mut items = from_stack.split_off(from_stack.len() - n);
-    let to_stack = &mut stacks[to - 1];
+    let mut to_stack = stacks.get_mut(to - 1).unwrap();
     to_stack.append(&mut items);
     Ok(())
 }
